@@ -264,9 +264,11 @@ export class EmberClient extends EventEmitter {
                         throw new InvalidEmberResponseError(`getDirectory ${requestedPath}`);
                     }
                 } else if (node.getElementByPath(requestedPath) != null) {
-                    this.logger?.log(ClientLogs.GETDIRECTORY_RESPONSE(node));
-                    if (node.isStream()) {
-                        const streamIdentifier = (node as Parameter).streamIdentifier;
+                    const resolved = node.getElementByPath(requestedPath)!;
+                    this.logger?.log(ClientLogs.GETDIRECTORY_RESPONSE(resolved));
+
+                    if (resolved.isStream && resolved.isStream()) {
+                        const streamIdentifier = (resolved as Parameter).streamIdentifier;
                         const streamEntry = this._streams.getEntry(streamIdentifier);
                         if (streamEntry != null && streamEntry.value !== requestedPath) {
                             // Duplicate Stream Entry.
@@ -281,7 +283,7 @@ export class EmberClient extends EventEmitter {
                             );
                         }
                     }
-                    return node; // make sure the info is treated before going to next request.
+                    return resolved; // return the element, not the response root        } else if (node.getElementByPath(requestedPath) != null) {
                 } else {
                     const nodeElements = node?.getChildren();
                     if (nodeElements != null &&
